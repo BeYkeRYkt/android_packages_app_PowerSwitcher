@@ -192,6 +192,9 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         mAdapter.clearAppList();
         mAdapter.notifyDataSetChanged();
         showProgressBar(true);
+        if (mTask != null) {
+            mTask.cancel(true);
+        }
         mTask = new LoadAppTask();
         mTask.execute();
     }
