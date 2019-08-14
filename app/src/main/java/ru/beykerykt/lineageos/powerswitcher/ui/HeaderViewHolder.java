@@ -12,12 +12,10 @@ public class HeaderViewHolder extends RecyclerView.ViewHolder {
 
     public TextView summary;
     public PreferenceImageView icon;
-    public View rootView;
 
     public HeaderViewHolder(@NonNull View itemView) {
         super(itemView);
         this.summary = (TextView) itemView.findViewById(R.id.header_summary);
         this.icon = (PreferenceImageView) itemView.findViewById(R.id.header_icon);
-        this.rootView = itemView;
     }
 }

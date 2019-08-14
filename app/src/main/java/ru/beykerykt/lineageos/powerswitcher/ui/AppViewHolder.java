@@ -14,13 +14,11 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
     public TextView title;
     public Spinner mode;
     public PreferenceImageView icon;
-    public View rootView;
 
     public AppViewHolder(@NonNull View itemView) {
         super(itemView);
         this.title = (TextView) itemView.findViewById(R.id.app_name);
         this.mode = (Spinner) itemView.findViewById(R.id.app_perf_profile);
         this.icon = (PreferenceImageView) itemView.findViewById(R.id.app_icon);
-        this.rootView = itemView;
     }
 }
