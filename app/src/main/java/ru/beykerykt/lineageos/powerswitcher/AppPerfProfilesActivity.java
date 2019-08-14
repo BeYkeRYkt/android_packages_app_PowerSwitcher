@@ -218,7 +218,7 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         protected List<AppInfo> doInBackground(Void... voids) {
             List<AppInfo> appInfoList = new CopyOnWriteArrayList<>();
             List<PackageInfo> packages = getPackageManager().getInstalledPackages(
-                    PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA | PackageManager.GET_SHARED_LIBRARY_FILES);
+                    PackageManager.GET_ACTIVITIES);
 
             for (PackageInfo info : packages) {
                 final ApplicationInfo appInfo = info.applicationInfo;
