@@ -23,4 +23,7 @@
 
     <!-- SystemApps -->
     <string name="show_system_apps_text">Показывать системные приложения</string>
+
+    <!-- Notification -->
+    <string name="notification_current_profile_text">Текущий профиль производительности</string>
 </resources>

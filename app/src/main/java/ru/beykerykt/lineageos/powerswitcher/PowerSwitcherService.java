@@ -273,12 +273,9 @@ public class PowerSwitcherService extends Service {
                 0, notificationIntent, 0);
 
         Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setContentTitle(TAG)
-                .setContentText("Current package: " + mCurrentAppPkg)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText("Current package: " + mCurrentAppPkg + "\n"
-                        + "Current power profile: " + mPerf.getPowerProfile(mCurrentProfileId).getName() + "\n"
-                        + "Default power profile: " + mPerf.getPowerProfile(mDefaultProfileId).getName() + "\n"
-                        + "Profile applied: " + mProfileApplied))
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.notification_current_profile_text) + ": " + mPerf.getPowerProfile(mCurrentProfileId).getName())
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(getString(R.string.notification_current_profile_text) + ": " + mPerf.getPowerProfile(mCurrentProfileId).getName()))
                 .setSmallIcon(R.drawable.ic_profile_balanced)
                 .setContentIntent(pendingIntent)
                 .build();
