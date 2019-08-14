@@ -115,20 +115,6 @@ public class PowerSwitcherService extends Service {
         }
     }
 
-    private final IBinder mBinder = new LocalBinder(this);
-
-    public class LocalBinder extends Binder {
-        private final WeakReference<PowerSwitcherService> mService;
-
-        public LocalBinder(PowerSwitcherService service) {// added a constructor for Stub here
-            mService = new WeakReference<>(service);
-        }
-
-        public PowerSwitcherService getService() {
-            return mService.get();
-        }
-    }
-
     private AppPerfProfilesManager mAppPerfManager;
 
     // Lineage power profiles
@@ -196,7 +182,7 @@ public class PowerSwitcherService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return null;
     }
 
     @Override
