@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AppPerfProfilesActivity"
+    android:orientation="vertical">
+
+    <!-- App Perf Profile switcher -->
+    <!-- <FrameLayout
+        android:id="@+id/app_perf_profiles_prefs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" /> -->
+    <include layout="@layout/switch_bar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- App List -->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/user_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- ProgressBar -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="visible" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

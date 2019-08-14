@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Power Profiles -->
+    <string-array name="power_profiles_entries" translatable="false">
+        <item>@string/power_save_profile_text</item>
+        <item>@string/bias_power_save_profile_text</item>
+        <item>@string/balanced_profile_text</item>
+        <item>@string/bias_performance_profile_text</item>
+        <item>@string/high_performance_profile_text</item>
+    </string-array>
+</resources>

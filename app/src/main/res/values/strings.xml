@@ -1,0 +1,26 @@
+<resources>
+    <!-- AppName -->
+    <string name="app_name">PowerSwitcher</string>
+
+    <!-- ActionBar -->
+    <string name="ab_add_app">Add app</string>
+
+    <!-- AppProfiles switch fragment -->
+    <string name="app_perf_profile_category_title">Device performance</string>
+    <string name="app_perf_profiles_title">Automatic optimization</string>
+    <string name="app_perf_profiles_summary">Automatically choose an appropriate performance profile for applications and usage patterns</string>
+
+    <!-- QS Tile -->
+    <string name="profiles_tile_label">Performance profiles</string>
+
+    <!-- Power Profiles text -->
+    <string name="dont_apply">Dont apply power profile</string>
+    <string name="power_save_profile_text">Power save</string>
+    <string name="balanced_profile_text">Balanced</string>
+    <string name="high_performance_profile_text">Performance</string>
+    <string name="bias_power_save_profile_text">Efficiency</string>
+    <string name="bias_performance_profile_text">Quick</string>
+
+    <!-- SystemApps -->
+    <string name="show_system_apps_text">Show system apps</string>
+</resources>

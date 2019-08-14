@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App icon -->
+    <color name="ic_launcher_background">#26A69A</color>
+
+    <!-- SplashActivity -->
+    <color name="splash_background_color">@color/colorPrimary</color>
+
+    <!-- Main Application colors -->
+    <!-- LineageOS Pallete -->
+    <color name="colorPrimary">#fefefe</color>
+    <color name="colorPrimaryDark">#e0e0e0</color>
+    <color name="colorAccent">#167c80</color>
+
+    <!-- SwitchBar -->
+    <color name="switch_bar_bg_color_enabled">@color/colorAccent</color>
+    <color name="switch_bar_bg_color_disabled">#ff80868B</color>
+    <color name="switch_bar_switch_thumb_tint_color">#FFFFFF</color>
+    <color name="switch_bar_switch_track_tint_color">#BFFFFFFF</color>
+</resources>
