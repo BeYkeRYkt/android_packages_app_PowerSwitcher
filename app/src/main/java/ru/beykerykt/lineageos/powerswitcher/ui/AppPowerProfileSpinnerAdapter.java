@@ -15,7 +15,7 @@ public class AppPowerProfileSpinnerAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
     private final int mTextColor;
     private final int[] mProfiles = {
-            R.string.dont_apply,
+            R.string.dont_apply_text,
             R.string.power_save_profile_text,
             R.string.bias_power_save_profile_text,
             R.string.balanced_profile_text,

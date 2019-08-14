@@ -2,11 +2,7 @@
     <!-- AppName -->
     <string name="app_name">PowerSwitcher</string>
 
-    <!-- ActionBar -->
-    <string name="ab_add_app">Добавить приложение</string>
-
     <!-- AppProfiles -->
-    <string name="app_perf_profile_category_title">Производительность устройства</string>
     <string name="app_perf_profiles_title">Автоматическая оптимизация</string>
     <string name="app_perf_profiles_summary">Автоматически переключать профиль производительности в зависимости от приложения</string>
 
@@ -14,7 +10,7 @@
     <string name="profiles_tile_label">Профили производительности</string>
 
     <!-- Power Profiles text -->
-    <string name="dont_apply">Не применять профиль производительности</string>
+    <string name="dont_apply_text">Не применять профиль производительности</string>
     <string name="power_save_profile_text">Экономия энергии</string>
     <string name="balanced_profile_text">Сбалансированный</string>
     <string name="high_performance_profile_text">Высокая производительность</string>
