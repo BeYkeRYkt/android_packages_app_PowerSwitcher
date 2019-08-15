@@ -12,22 +12,22 @@ import java.util.Set;
 import static ru.beykerykt.lineageos.powerswitcher.Constants.APP_PREFERENCES_APPLICATIONS;
 import static ru.beykerykt.lineageos.powerswitcher.Constants.getAppPrefs;
 
-public class AppPerfProfilesManager {
+public class PerfProfilesManager {
 
-    private String TAG = "AppPerfProfilesManager";
+    private String TAG = "PerfProfilesManager";
 
-    private static AppPerfProfilesManager mAppManager;
+    private static PerfProfilesManager perfProfilesManager;
     private static final LinkedHashMap<String, Integer> mAppProfiles = new LinkedHashMap<>(); // for tests
 
-    public AppPerfProfilesManager() {
+    public PerfProfilesManager() {
     }
 
-    public static AppPerfProfilesManager getInstance() {
-        if (mAppManager != null) {
-            return mAppManager;
+    public static PerfProfilesManager getInstance() {
+        if (perfProfilesManager != null) {
+            return perfProfilesManager;
         }
-        mAppManager = new AppPerfProfilesManager();
-        return mAppManager;
+        perfProfilesManager = new PerfProfilesManager();
+        return perfProfilesManager;
     }
 
     public LinkedHashMap<String, Integer> getAppProfiles() {

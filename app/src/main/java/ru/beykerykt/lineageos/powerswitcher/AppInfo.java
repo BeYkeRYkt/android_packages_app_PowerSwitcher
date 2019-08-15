@@ -1,4 +1,4 @@
-package ru.beykerykt.lineageos.powerswitcher.ui;
+package ru.beykerykt.lineageos.powerswitcher;
 
 import android.graphics.drawable.Drawable;
 

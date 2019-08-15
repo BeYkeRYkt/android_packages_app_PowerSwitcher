@@ -12,15 +12,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
-
-import java.lang.ref.WeakReference;
 
 import lineageos.power.PerformanceManager;
 
@@ -54,7 +51,7 @@ public class PowerSwitcherService extends Service {
             boolean appSwitch = false;
 
             if (mAppPerfManager == null) {
-                mAppPerfManager = AppPerfProfilesManager.getInstance();
+                mAppPerfManager = PerfProfilesManager.getInstance();
                 if (mAppPerfManager.getAppProfiles().isEmpty()) {
                     mAppPerfManager.restoreAppProfiles(getApplicationContext());
                 }
@@ -115,7 +112,7 @@ public class PowerSwitcherService extends Service {
         }
     }
 
-    private AppPerfProfilesManager mAppPerfManager;
+    private PerfProfilesManager mAppPerfManager;
 
     // Lineage power profiles
     private PerformanceManager mPerf;
@@ -150,7 +147,7 @@ public class PowerSwitcherService extends Service {
             return;
         }
 
-        mAppPerfManager = AppPerfProfilesManager.getInstance();
+        mAppPerfManager = PerfProfilesManager.getInstance();
         if (mAppPerfManager.getAppProfiles().isEmpty()) {
             mAppPerfManager.restoreAppProfiles(getApplicationContext());
         }

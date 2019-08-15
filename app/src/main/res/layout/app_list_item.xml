@@ -12,6 +12,8 @@
         android:id="@+id/app_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         app:maxWidth="48dp"
         app:maxHeight="48dp" />
 
@@ -35,7 +37,7 @@
 
         <Spinner
             android:id="@+id/app_perf_profile"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

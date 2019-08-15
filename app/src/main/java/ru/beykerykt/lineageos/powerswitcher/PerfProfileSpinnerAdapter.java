@@ -1,4 +1,4 @@
-package ru.beykerykt.lineageos.powerswitcher.ui;
+package ru.beykerykt.lineageos.powerswitcher;
 
 import android.content.Context;
 import android.util.TypedValue;
@@ -8,9 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import ru.beykerykt.lineageos.powerswitcher.R;
-
-public class AppPowerProfileSpinnerAdapter extends BaseAdapter {
+public class PerfProfileSpinnerAdapter extends BaseAdapter {
 
     private final LayoutInflater mInflater;
     private final int mTextColor;
@@ -23,7 +21,7 @@ public class AppPowerProfileSpinnerAdapter extends BaseAdapter {
             R.string.high_performance_profile_text
     };
 
-    public AppPowerProfileSpinnerAdapter(Context context) {
+    public PerfProfileSpinnerAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(android.R.attr.textColorSecondary,

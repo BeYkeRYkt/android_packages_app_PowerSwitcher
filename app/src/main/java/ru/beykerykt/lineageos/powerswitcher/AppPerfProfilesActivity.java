@@ -22,14 +22,12 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import ru.beykerykt.lineageos.powerswitcher.ui.AppInfo;
-import ru.beykerykt.lineageos.powerswitcher.ui.RecycleViewAdapter;
 
 import static lineageos.power.PerformanceManager.PROFILE_HIGH_PERFORMANCE;
 import static ru.beykerykt.lineageos.powerswitcher.Constants.APP_PREFERENCES_APPLICATIONS;
@@ -52,16 +50,16 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         }
     };
 
-    private LoadAppTask mTask;
+    private LoadAppTask mTask = null;
     private RecyclerView mRecycleView;
-    private RecycleViewAdapter mAdapter;
+    private RecyclerViewAdapter mAdapter;
     private TextView mTextView;
     private View mSwitchBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.app_perf_profiles_activity);
+        setContentView(R.layout.main_activity);
 
         // switch bar
         mTextView = findViewById(R.id.switch_text);
@@ -97,10 +95,10 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
 
         mRecycleView = findViewById(R.id.user_list_view);
         mRecycleView.setHasFixedSize(true);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getApplicationContext());
         mRecycleView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new RecycleViewAdapter(this);
+        mAdapter = new RecyclerViewAdapter(this.getApplicationContext());
         mRecycleView.setAdapter(mAdapter);
 
         // start service
@@ -124,7 +122,9 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         super.onDestroy();
         mAdapter.clearAppList();
         mRecycleView.setAdapter(null);
-        if(mTask != null) {
+        mAdapter = null;
+        mRecycleView = null;
+        if (mTask != null) {
             mTask.cancel(true);
         }
         unregisterReceiver(mReceiver);
@@ -139,7 +139,7 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.app_perf_profiles_menu, menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -195,7 +195,7 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         if (mTask != null) {
             mTask.cancel(true);
         }
-        mTask = new LoadAppTask();
+        mTask = new LoadAppTask(this);
         mTask.execute();
     }
 
@@ -215,29 +215,39 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
     /**
      * An asynchronous task to load the icons of the installed applications.
      */
-    private class LoadAppTask extends AsyncTask<Void, Void, List<AppInfo>> {
+    private static class LoadAppTask extends AsyncTask<Void, Void, List<AppInfo>> {
+
+        private WeakReference<AppPerfProfilesActivity> activityReference;
+
+        LoadAppTask(AppPerfProfilesActivity context) {
+            activityReference = new WeakReference<>(context);
+        }
 
         @Override
         protected List<AppInfo> doInBackground(Void... voids) {
             List<AppInfo> appInfoList = new CopyOnWriteArrayList<>();
-            List<PackageInfo> packages = getPackageManager().getInstalledPackages(
+
+            AppPerfProfilesActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing()) return appInfoList;
+
+            List<PackageInfo> packages = activity.getPackageManager().getInstalledPackages(
                     PackageManager.GET_ACTIVITIES);
 
             for (PackageInfo info : packages) {
                 final ApplicationInfo appInfo = info.applicationInfo;
 
                 // skip all system apps if they shall not be included
-                if ((!shouldShowSystemApps() && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+                if ((!activity.shouldShowSystemApps() && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
                         || (appInfo.uid == android.os.Process.SYSTEM_UID)
-                        || isBlacklisted(appInfo.packageName)) {
+                        || activity.isBlacklisted(appInfo.packageName)) {
                     continue;
                 }
 
                 AppInfo app = new AppInfo();
-                app.mAppLabel = appInfo.loadLabel(getPackageManager()).toString();
+                app.mAppLabel = appInfo.loadLabel(activity.getPackageManager()).toString();
                 app.mPackageName = info.packageName;
                 try {
-                    Drawable icon = getPackageManager().getApplicationIcon(app.mPackageName);
+                    Drawable icon = activity.getPackageManager().getApplicationIcon(app.mPackageName);
                     app.mIcon = icon;
                 } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
@@ -252,8 +262,10 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         @Override
         protected void onPostExecute(List<AppInfo> appInfoList) {
             super.onPostExecute(appInfoList);
-            mAdapter.setAppList(appInfoList);
-            showProgressBar(false);
+            AppPerfProfilesActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing()) return;
+            activity.mAdapter.setAppList(appInfoList);
+            activity.showProgressBar(false);
         }
     }
 }

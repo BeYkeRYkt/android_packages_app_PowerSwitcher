@@ -1,19 +1,19 @@
-package ru.beykerykt.lineageos.powerswitcher.ui;
+package ru.beykerykt.lineageos.powerswitcher;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v7.internal.widget.PreferenceImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import ru.beykerykt.lineageos.powerswitcher.AppPerfProfilesManager;
-import ru.beykerykt.lineageos.powerswitcher.R;
 
 import static lineageos.power.PerformanceManager.PROFILE_BALANCED;
 import static lineageos.power.PerformanceManager.PROFILE_BIAS_PERFORMANCE;
@@ -21,24 +21,24 @@ import static lineageos.power.PerformanceManager.PROFILE_BIAS_POWER_SAVE;
 import static lineageos.power.PerformanceManager.PROFILE_HIGH_PERFORMANCE;
 import static lineageos.power.PerformanceManager.PROFILE_POWER_SAVE;
 
-public class RecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements AdapterView.OnItemSelectedListener {
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements AdapterView.OnItemSelectedListener {
 
     private List<AppInfo> mApps;
     private Context mContext;
     private Drawable mDefaultImg;
-    private final AppPerfProfilesManager mAppPerfManager;
+    private final PerfProfilesManager mPerfProfilesManager;
 
     private int TYPE_HEADER = 0;
     private int TYPE_ITEM = 1;
 
     private int PROFILE_NOTHING = -1;
 
-    public RecycleViewAdapter(Context context) {
+    public RecyclerViewAdapter(Context context) {
         this.mContext = context.getApplicationContext();
         this.mApps = new CopyOnWriteArrayList<>();
-        this.mAppPerfManager = AppPerfProfilesManager.getInstance();
-        if (mAppPerfManager.getAppProfiles().isEmpty()) {
-            mAppPerfManager.restoreAppProfiles(mContext);
+        this.mPerfProfilesManager = PerfProfilesManager.getInstance();
+        if (mPerfProfilesManager.getAppProfiles().isEmpty()) {
+            mPerfProfilesManager.restoreAppProfiles(mContext);
         }
         mDefaultImg = mContext.getDrawable(android.R.mipmap.sym_def_app_icon);
     }
@@ -48,11 +48,11 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View itemView;
         if (i == TYPE_ITEM) {
-            itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_app_item, viewGroup, false);
+            itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.app_list_item, viewGroup, false);
             AppViewHolder appViewHolder = new AppViewHolder(itemView);
             return appViewHolder;
         } else if (i == TYPE_HEADER) {
-            itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_app_header, viewGroup, false);
+            itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.app_list_header, viewGroup, false);
             HeaderViewHolder headerViewHolder = new HeaderViewHolder(itemView);
             return headerViewHolder;
         }
@@ -66,15 +66,15 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             AppInfo data = getItem(i);
             appViewHolder.title.setText(data.mAppLabel);
             Drawable icon = mDefaultImg;
-            if(data.mIcon != null) {
+            if (data.mIcon != null) {
                 icon = data.mIcon;
             }
             appViewHolder.icon.setImageDrawable(icon);
-            appViewHolder.mode.setAdapter(new AppPowerProfileSpinnerAdapter(mContext));
+            appViewHolder.mode.setAdapter(new PerfProfileSpinnerAdapter(mContext));
             appViewHolder.mode.setTag(data);
             int profileId = 0;
-            if (mAppPerfManager.availableAppProfile(data.mPackageName)) {
-                profileId = convertProfileToItemList(mAppPerfManager.getProfileFromAppPackage(data.mPackageName));
+            if (mPerfProfilesManager.availableAppProfile(data.mPackageName)) {
+                profileId = convertProfileToItemList(mPerfProfilesManager.getProfileFromAppPackage(data.mPackageName));
             }
             appViewHolder.mode.setSelection(profileId);
             appViewHolder.mode.setOnItemSelectedListener(this);
@@ -149,11 +149,11 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 break;
         }
         if (profile != PROFILE_NOTHING) {
-            mAppPerfManager.addAppProfile(pkgName, profile);
+            mPerfProfilesManager.addAppProfile(pkgName, profile);
         } else {
-            mAppPerfManager.removeAppProfile(pkgName);
+            mPerfProfilesManager.removeAppProfile(pkgName);
         }
-        mAppPerfManager.saveAppProfiles(mContext);
+        mPerfProfilesManager.saveAppProfiles(mContext);
     }
 
     @Override
@@ -168,5 +168,31 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         clearAppList();
         this.mApps = appInfoList;
         notifyDataSetChanged();
+    }
+
+    private static class AppViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView title;
+        public Spinner mode;
+        public PreferenceImageView icon;
+
+        public AppViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.title = (TextView) itemView.findViewById(R.id.app_name);
+            this.mode = (Spinner) itemView.findViewById(R.id.app_perf_profile);
+            this.icon = (PreferenceImageView) itemView.findViewById(R.id.app_icon);
+        }
+    }
+
+    private static class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView summary;
+        public PreferenceImageView icon;
+
+        public HeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.summary = (TextView) itemView.findViewById(R.id.header_summary);
+            this.icon = (PreferenceImageView) itemView.findViewById(R.id.header_icon);
+        }
     }
 }
