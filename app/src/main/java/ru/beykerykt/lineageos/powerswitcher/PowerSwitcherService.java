@@ -186,6 +186,7 @@ public class PowerSwitcherService extends Service {
     public void onDestroy() {
         unregisterReceiver(mReceiver);
         mHandler.getLooper().quitSafely();
+        mHandler.getLooper().getThread().interrupt();
         mPerf.setPowerProfile(mDefaultProfileId); // restore to default profile
         stopForeground(true);
         Log.i(TAG, "Service is down.");
