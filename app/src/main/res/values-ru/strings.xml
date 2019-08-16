@@ -9,7 +9,7 @@
     <!-- QS Tile -->
     <string name="profiles_tile_label">Профили производительности</string>
 
-    <!-- Power Profiles text -->
+    <!-- Performance Profiles text -->
     <string name="dont_apply_text">Не применять профиль производительности</string>
     <string name="power_save_profile_text">Экономия энергии</string>
     <string name="balanced_profile_text">Сбалансированный</string>
