@@ -230,15 +230,14 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
             AppPerfProfilesActivity activity = activityReference.get();
             if (activity == null || activity.isFinishing()) return appInfoList;
 
-            List<PackageInfo> packages = activity.getPackageManager().getInstalledPackages(
-                    PackageManager.GET_ACTIVITIES);
+            List<PackageInfo> packages = activity.getPackageManager().getInstalledPackages(0);
 
             for (PackageInfo info : packages) {
                 final ApplicationInfo appInfo = info.applicationInfo;
 
                 // skip all system apps if they shall not be included
-                if ((!activity.shouldShowSystemApps() && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                        || (appInfo.uid == android.os.Process.SYSTEM_UID)
+                if ((!activity.shouldShowSystemApps() && (appInfo.flags & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) != 0)
+                        || activity.getPackageManager().getLaunchIntentForPackage(info.packageName) == null && (appInfo.flags & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) != 0
                         || activity.isBlacklisted(appInfo.packageName)) {
                     continue;
                 }
