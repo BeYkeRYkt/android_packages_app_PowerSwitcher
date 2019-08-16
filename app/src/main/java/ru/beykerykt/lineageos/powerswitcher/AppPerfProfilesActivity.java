@@ -35,6 +35,7 @@ import static ru.beykerykt.lineageos.powerswitcher.Constants.APP_PREFERENCES_FIR
 import static ru.beykerykt.lineageos.powerswitcher.Constants.APP_PREFERENCES_SERVICE_ENABLED;
 import static ru.beykerykt.lineageos.powerswitcher.Constants.APP_PREFERENCES_SHOW_SYSTEM_APPS;
 import static ru.beykerykt.lineageos.powerswitcher.Constants.getAppPrefs;
+import static ru.beykerykt.lineageos.powerswitcher.Constants.isServiceEnabled;
 
 public class AppPerfProfilesActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
@@ -65,7 +66,7 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         mTextView = findViewById(R.id.switch_text);
         mTextView.setText(getString(R.string.app_perf_profiles_title));
 
-        boolean serviceEnabled = Constants.isServiceEnabled(this);
+        boolean serviceEnabled = isServiceEnabled(this);
         mSwitchBar = findViewById(R.id.switch_bar);
         final Switch switchWidget = mSwitchBar.findViewById(android.R.id.switch_widget);
         switchWidget.setChecked(serviceEnabled);
@@ -102,7 +103,7 @@ public class AppPerfProfilesActivity extends AppCompatActivity implements Compou
         mRecycleView.setAdapter(mAdapter);
 
         // start service
-        if (getAppPrefs(this).getBoolean(APP_PREFERENCES_SERVICE_ENABLED, false)) {
+        if (isServiceEnabled(this)) {
             Intent intent = new Intent(this, PowerSwitcherService.class);
             startForegroundService(intent);
         }
