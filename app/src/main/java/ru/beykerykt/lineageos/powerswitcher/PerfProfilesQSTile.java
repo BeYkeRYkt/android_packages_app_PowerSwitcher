@@ -2,7 +2,6 @@ package ru.beykerykt.lineageos.powerswitcher;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.graphics.drawable.Icon;
 import android.service.quicksettings.Tile;
@@ -16,32 +15,27 @@ import static lineageos.power.PerformanceManager.PROFILE_BIAS_POWER_SAVE;
 import static lineageos.power.PerformanceManager.PROFILE_HIGH_PERFORMANCE;
 import static lineageos.power.PerformanceManager.PROFILE_POWER_SAVE;
 
-public class PerfProfilesQSTile extends TileService {
+public final class PerfProfilesQSTile extends TileService {
     private PerformanceManager mPerf;
     private int mCurrentProfile = -1;
+    private static PerfProfilesQSTile mListeningInstance;
 
     @Override
     public void onCreate() {
-        mPerf = PerformanceManager.getInstance(this);
-        TileService.requestListeningState(this, new ComponentName(this, PerfProfilesQSTile.class));
-    }
-
-    @Override
-    public void onTileAdded() {
-        updateQsTile();
+        mPerf = PerformanceManager.getInstance(getApplicationContext());
     }
 
     @Override
     public void onStartListening() {
-        if (mPerf.getActivePowerProfile() != null) {
-            mCurrentProfile = mPerf.getActivePowerProfile().getId();
-        }
-        updateQsTile();
+        mListeningInstance = this;
+        mListeningInstance.updateQsTile();
     }
 
     @Override
     public void onStopListening() {
-        updateQsTile();
+        if (mListeningInstance == this) {
+            mListeningInstance = null;
+        }
     }
 
     @Override
@@ -49,40 +43,55 @@ public class PerfProfilesQSTile extends TileService {
         showDialog(createDialog());
     }
 
-    private void updateQsTile() {
+    public static void updateTile() {
+        if (mListeningInstance != null) {
+            mListeningInstance.updateQsTile();
+        }
+    }
+
+    private final void updateQsTile() {
+        Tile tile = getQsTile();
+        int state = Tile.STATE_UNAVAILABLE;
+
         if (mPerf != null && mPerf.getNumberOfProfiles() > 0) {
-            getQsTile().setState(Tile.STATE_ACTIVE);
+            if (mPerf.getActivePowerProfile() != null) {
+                state = Tile.STATE_ACTIVE;
+                mCurrentProfile = mPerf.getActivePowerProfile().getId();
+            } else {
+                mCurrentProfile = -1;
+            }
         } else {
-            getQsTile().setState(Tile.STATE_UNAVAILABLE);
+            mCurrentProfile = -1;
         }
 
         switch (mCurrentProfile) {
             case PROFILE_POWER_SAVE:
-                getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_profile_power_save));
-                getQsTile().setLabel(getString(R.string.power_save_profile_text));
+                tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_profile_power_save));
+                tile.setLabel(getString(R.string.power_save_profile_text));
                 break;
             case PROFILE_BALANCED:
-                getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_profile_balanced));
-                getQsTile().setLabel(getString(R.string.balanced_profile_text));
+                tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_profile_balanced));
+                tile.setLabel(getString(R.string.balanced_profile_text));
                 break;
             case PROFILE_HIGH_PERFORMANCE:
-                getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_profile_high_performance));
-                getQsTile().setLabel(getString(R.string.high_performance_profile_text));
+                tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_profile_high_performance));
+                tile.setLabel(getString(R.string.high_performance_profile_text));
                 break;
             case PROFILE_BIAS_POWER_SAVE:
-                getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_profile_bias_power_save));
-                getQsTile().setLabel(getString(R.string.bias_power_save_profile_text));
+                tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_profile_bias_power_save));
+                tile.setLabel(getString(R.string.bias_power_save_profile_text));
                 break;
             case PROFILE_BIAS_PERFORMANCE:
-                getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_profile_bias_performance));
-                getQsTile().setLabel(getString(R.string.bias_performance_profile_text));
+                tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_profile_bias_performance));
+                tile.setLabel(getString(R.string.bias_performance_profile_text));
                 break;
             default:
-                getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_profile_balanced));
-                getQsTile().setLabel(getString(R.string.profiles_tile_label));
+                tile.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.ic_profile_balanced));
+                tile.setLabel(getString(R.string.profiles_tile_label));
                 break;
         }
-        getQsTile().updateTile();
+        tile.setState(state);
+        tile.updateTile();
     }
 
     private int convertProfileToDialogItem() {
@@ -108,8 +117,13 @@ public class PerfProfilesQSTile extends TileService {
     }
 
     private Dialog createDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
         builder.setTitle(R.string.profiles_tile_label)
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
                 .setSingleChoiceItems(R.array.power_profiles_entries, convertProfileToDialogItem(),
                         new DialogInterface.OnClickListener() {
                             @Override

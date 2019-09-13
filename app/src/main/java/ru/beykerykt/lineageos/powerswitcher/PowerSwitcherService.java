@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -44,11 +45,10 @@ public class PowerSwitcherService extends Service {
         }
     };
 
-    class BackgroundTask implements Runnable {
+    private Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
             boolean updNotif = false;
-            boolean appSwitch = false;
 
             if (mAppPerfManager == null) {
                 mAppPerfManager = PerfProfilesManager.getInstance();
@@ -57,60 +57,42 @@ public class PowerSwitcherService extends Service {
                 }
             }
 
-            if (getForegroundAppPackage() != null) { // foreground can be null
-                // application
-                if (!mCurrentAppPkg.equals(getForegroundAppPackage())) {
-                    Log.i(TAG, "Current foreground app has been changed!");
-                    mCurrentAppPkg = getForegroundAppPackage();
-                    updNotif = true;
-                    appSwitch = true;
-                }
-
-                if (appSwitch) {
-                    if (!isAppProfileApplied()) {
-                        if (mAppPerfManager.availableAppProfile(mCurrentAppPkg)) {
-                            Log.i(TAG, "Switching power profile for " + mCurrentAppPkg);
-                            int profileId = mAppPerfManager.getProfileFromAppPackage(mCurrentAppPkg);
-                            if (mPerf.getPowerProfile(profileId) == null) {
-                                profileId = mDefaultProfileId;
-                            }
-                            mPerf.setPowerProfile(profileId);
-                            mProfileApplied = true;
-                        }
-                    } else {
-                        if (mAppPerfManager.availableAppProfile(mCurrentAppPkg)) {
-                            Log.i(TAG, "Switching power profile for " + mCurrentAppPkg);
-                            int profileId = mAppPerfManager.getProfileFromAppPackage(mCurrentAppPkg);
-                            if (mPerf.getPowerProfile(profileId) == null) {
-                                profileId = mDefaultProfileId;
-                            }
-                            mPerf.setPowerProfile(profileId);
-                            mProfileApplied = true;
-                        } else {
-                            Log.i(TAG, "Return to default power profile for " + mCurrentAppPkg);
-                            mPerf.setPowerProfile(mDefaultProfileId);
-                            mProfileApplied = false;
-                        }
-                    }
-                }
-
-                // profiles
-                if (mCurrentProfileId != mPerf.getActivePowerProfile().getId()) {
-                    mCurrentProfileId = mPerf.getActivePowerProfile().getId();
-                    if (!isAppProfileApplied()) {
-                        setDefaultPowerProfile(mPerf.getActivePowerProfile().getId());
-                    }
-                    updNotif = true;
-                }
-
-                if (updNotif) {
-                    Log.i(TAG, "Updating notification");
-                    updateNotification();
+            // power save mode
+            PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            boolean powerSaveMode = powerManager.isPowerSaveMode();
+            if (!powerSaveMode) {
+                if (mPowerSaveMode) {
+                    // restore default profile
+                    mPerf.setPowerProfile(mDefaultProfileId);
                 }
             }
+            mPowerSaveMode = powerSaveMode;
+
+            // application
+            String currentAppPkg = getForegroundAppPackage();
+            if (currentAppPkg != null) {
+                updateCurrentAppProfile(currentAppPkg);
+            }
+
+            // profiles
+            if (!mPowerSaveMode && (mCurrentProfileId != mPerf.getActivePowerProfile().getId())) {
+                mCurrentProfileId = mPerf.getActivePowerProfile().getId();
+                PerfProfilesQSTile.updateTile();
+                if (!isAppProfileApplied()) {
+                    setDefaultPowerProfile(mPerf.getActivePowerProfile().getId());
+                }
+                updNotif = true;
+            }
+
+            // Notification
+            if (updNotif) {
+                Log.i(TAG, "Updating notification");
+                updateNotification();
+            }
+
             mHandler.postDelayed(this, repeat_time);
         }
-    }
+    };
 
     private PerfProfilesManager mAppPerfManager;
 
@@ -120,9 +102,10 @@ public class PowerSwitcherService extends Service {
     private int mCurrentProfileId = -1;
     private String mCurrentAppPkg = "";
     private boolean mProfileApplied = false;
+    private boolean mPowerSaveMode = false;
 
     private Handler mHandler = null;
-    private int repeat_time = 250;
+    private static final int repeat_time = 250;
 
     @Override
     public void onCreate() {
@@ -164,7 +147,7 @@ public class PowerSwitcherService extends Service {
         mCurrentProfileId = mPerf.getActivePowerProfile().getId();
 
         // add 'repeater'
-        mHandler.postDelayed(new BackgroundTask(), repeat_time);
+        mHandler.postDelayed(mRunnable, repeat_time);
 
         // notification
         createNotificationChannel();
@@ -185,6 +168,7 @@ public class PowerSwitcherService extends Service {
     @Override
     public void onDestroy() {
         unregisterReceiver(mReceiver);
+        mHandler.removeCallbacks(mRunnable);
         mHandler.getLooper().quitSafely();
         mHandler.getLooper().getThread().interrupt();
         mPerf.setPowerProfile(mDefaultProfileId); // restore to default profile
@@ -211,6 +195,43 @@ public class PowerSwitcherService extends Service {
             e.apply();
         }
         mDefaultProfileId = profileId;
+    }
+
+    public void updateCurrentAppProfile(String currentAppPkg) {
+        if (!isAppProfileApplied()) {
+            if (!mPowerSaveMode && mAppPerfManager.availableAppProfile(currentAppPkg)) {
+                mCurrentAppPkg = currentAppPkg;
+                Log.i(TAG, "Target foreground app has been detected: " + mCurrentAppPkg);
+                Log.i(TAG, "Applying power profile for " + mCurrentAppPkg);
+                int profileId = mAppPerfManager.getProfileFromAppPackage(mCurrentAppPkg);
+                if (mPerf.getPowerProfile(profileId) == null) {
+                    profileId = mDefaultProfileId;
+                }
+                mPerf.setPowerProfile(profileId);
+                mProfileApplied = true;
+            }
+        } else {
+            if (!mCurrentAppPkg.equals(currentAppPkg)) {
+                if (!mPowerSaveMode && mAppPerfManager.availableAppProfile(currentAppPkg)) {
+                    mCurrentAppPkg = currentAppPkg;
+                    Log.i(TAG, "Target foreground app has been changed: " + mCurrentAppPkg);
+                    Log.i(TAG, "Switching power profile for " + mCurrentAppPkg);
+                    int profileId = mAppPerfManager.getProfileFromAppPackage(mCurrentAppPkg);
+                    if (mPerf.getPowerProfile(profileId) == null) {
+                        profileId = mDefaultProfileId;
+                    }
+                    mPerf.setPowerProfile(profileId);
+                    mProfileApplied = true;
+                } else {
+                    Log.i(TAG, "Return to default power profile for " + currentAppPkg);
+                    mCurrentAppPkg = "";
+                    if (!mPowerSaveMode) {
+                        mPerf.setPowerProfile(mDefaultProfileId);
+                    }
+                    mProfileApplied = false;
+                }
+            }
+        }
     }
 
     /**
