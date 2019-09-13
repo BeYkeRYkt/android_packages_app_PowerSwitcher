@@ -222,7 +222,7 @@ public class PowerSwitcherService extends Service {
         UsageStatsManager mUsageStatsManager = (UsageStatsManager) getSystemService(Service.USAGE_STATS_SERVICE);
         long time = System.currentTimeMillis();
 
-        UsageEvents usageEvents = mUsageStatsManager.queryEvents(time - 1000 * 3600, time);
+        UsageEvents usageEvents = mUsageStatsManager.queryEvents(time - 1000 * 2, time);
         UsageEvents.Event event = new UsageEvents.Event();
         while (usageEvents.hasNextEvent()) {
             usageEvents.getNextEvent(event);
